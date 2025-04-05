@@ -6,13 +6,16 @@ public class Accounts{
     private final String CUSTOMERNAME;
     private final int ACCOUNTNUMBER;
     private final String CUSTOMERADDRESS;
+
+    int balance;
     
 
-    Accounts(String customerName, int accountNumber, String customerAddress, ACCOUNTS accountType){
+    Accounts(String customerName, int accountNumber, String customerAddress, ACCOUNTS accountType, int balance){
         CUSTOMERNAME = customerName;
         ACCOUNTNUMBER = accountNumber;
         CUSTOMERADDRESS = customerAddress;
         ACCOUNTTYPE = accountType;
+        this.balance = balance;
         System.out.println(ACCOUNTTYPE);
     }
 
