@@ -13,14 +13,20 @@ public class KeyboardInput implements KeyListener{
 
     @Override
     public void keyTyped(KeyEvent e) {
-        
+
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        //System.out.println(e);
-        System.out.println(bankTellingService.CharacterEntered(e.getKeyChar(),e.getKeyCode()));
-        //bankTellingService.CharacterEntered(e.getKeyChar(),e.getKeyCode());
+        System.out.println("KeyCode: "+e.getKeyCode()+"KeyChar: "+e.getKeyChar());
+        if((e.getKeyCode() != 17)&&(e.getKeyCode() != 16)&&(e.getKeyCode() != 20)&&(e.getKeyCode() != 127)){
+            input = bankTellingService.CharacterEntered(e.getKeyChar(),e.getKeyCode());
+        }
+        if(input != "r"){
+            System.out.println(input);
+            bankTellingService.input = "";
+            bankTellingService.typedChars = new char[0];
+        }
     }
 
     @Override
