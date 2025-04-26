@@ -19,7 +19,7 @@ public class KeyboardInput implements KeyListener{
     @Override
     public void keyPressed(KeyEvent e) {
         System.out.println("KeyCode: "+e.getKeyCode()+"KeyChar: "+e.getKeyChar());
-        if((e.getKeyCode() != 17)&&(e.getKeyCode() != 16)&&(e.getKeyCode() != 20)&&(e.getKeyCode() != 127)){
+        if((e.getKeyCode() != 17)&&(e.getKeyCode() != 16)&&(e.getKeyCode() != 20)&&(e.getKeyCode() != 127)&&(e.getKeyCode() != 18)&&(e.getKeyCode() != 524)&&(e.getKeyCode() != 0)){
             input = bankTellingService.CharacterEntered(e.getKeyChar(),e.getKeyCode());
         }
         if(input != "r"){
