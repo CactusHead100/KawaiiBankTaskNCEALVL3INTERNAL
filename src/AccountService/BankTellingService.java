@@ -1,6 +1,7 @@
 package AccountService;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
@@ -11,6 +12,10 @@ public class BankTellingService extends JPanel{
 
     final int canvasHeight = 640;
     final int canvasWidth = 640;
+
+    
+
+    Boolean invalidText = false;
 
     int mouseX;
     int mouseY;
@@ -26,18 +31,20 @@ public class BankTellingService extends JPanel{
 
     }
     public String CharacterEntered(char character, int charVal){
+        System.out.println("sent: "+input);
         if(charVal == 10){
-            for(int i = 0; i < typedChars.length; i++){
-                input = input + typedChars[i]; 
-                System.out.println(typedChars[i]);
-            }
-            System.out.println(input);
             return input;
         }else if((charVal == 8)&&(typedChars.length > 0)){
             typedChars = SizeChanger(typedChars,false,character);
         }else{
             typedChars = SizeChanger(typedChars,true,character);
         }
+        input ="";
+        for(int i = 0; i < typedChars.length; i++){
+            input = input + typedChars[i]; 
+            System.out.println(input);
+        }
+        repaint();
         return "r";
     }
     public char[] SizeChanger(char[] oldString,boolean increase, char newChar){
@@ -60,5 +67,16 @@ public class BankTellingService extends JPanel{
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         g2d.clearRect(0,0,canvasWidth, canvasHeight);
+
+        System.out.println("recieved: "+input);
+        g2d.setColor(Color.black);
+        g2d.setFont(new Font("Arial", Font.PLAIN, 25));
+        g2d.drawString(input,canvasWidth/2,canvasHeight/2);
+
+        if(invalidText){
+            g2d.setColor(Color.red);
+            g2d.setFont(new Font("Arial", Font.BOLD, 30));
+            g2d.drawString("INVALID",canvasWidth/2,canvasHeight/2+50);
+        }
     }
 }
