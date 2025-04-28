@@ -10,7 +10,7 @@ public class Accounts{
     int balance;
     
 
-    Accounts(String customerName, int accountNumber, String customerAddress, ACCOUNTS accountType, int balance){
+    Accounts(String customerName, String customerAddress, int accountNumber, ACCOUNTS accountType, int balance){
         CUSTOMERNAME = customerName;
         ACCOUNTNUMBER = accountNumber;
         CUSTOMERADDRESS = customerAddress;

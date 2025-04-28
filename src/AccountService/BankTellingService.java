@@ -4,6 +4,10 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.io.File;
+import java.util.Scanner;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.swing.JPanel;
 
@@ -13,7 +17,7 @@ public class BankTellingService extends JPanel{
     final int canvasHeight = 640;
     final int canvasWidth = 640;
 
-    
+    File userDetails =  new File("src//AccountService//UserInfo.csv");
 
     Boolean invalidText = false;
 
@@ -26,6 +30,16 @@ public class BankTellingService extends JPanel{
     String keyBoardInput;
     BankTellingService (){
         addKeyListener(keyboardInput);
+        try{
+            Scanner infoGetter = new Scanner(userDetails);
+            while(infoGetter.hasNextLine()){
+                String info = infoGetter.nextLine();
+                System.out.println(info);
+            }
+            infoGetter.close();
+        }catch(IOException e){
+            System.out.println("fail");
+        }
     }
     public void CreateNewAccount(){
 
