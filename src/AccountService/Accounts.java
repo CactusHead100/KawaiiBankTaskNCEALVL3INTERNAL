@@ -4,13 +4,13 @@ public class Accounts{
     public enum ACCOUNTS{Everyday, Savings, Current};
     private final ACCOUNTS ACCOUNTTYPE;
     private final String CUSTOMERNAME;
-    private final int ACCOUNTNUMBER;
+    private final String ACCOUNTNUMBER;
     private final String CUSTOMERADDRESS;
 
-    int balance;
+    double balance;
     
 
-    Accounts(String customerName, String customerAddress, int accountNumber, ACCOUNTS accountType, int balance){
+    Accounts(String customerName, String customerAddress, String accountNumber, ACCOUNTS accountType, double balance){
         CUSTOMERNAME = customerName;
         ACCOUNTNUMBER = accountNumber;
         CUSTOMERADDRESS = customerAddress;

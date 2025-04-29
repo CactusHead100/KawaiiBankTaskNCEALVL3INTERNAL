@@ -5,19 +5,25 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.swing.JPanel;
 
+import AccountService.Accounts.ACCOUNTS;
+
 public class BankTellingService extends JPanel{
     private KeyboardInput keyboardInput = new KeyboardInput(this);
+
+    final int enterKeyVal = 10;
 
     final int canvasHeight = 640;
     final int canvasWidth = 640;
 
     File userDetails =  new File("src//AccountService//UserInfo.csv");
+    ArrayList<Accounts> users = new ArrayList<Accounts>();
 
     Boolean invalidText = false;
 
@@ -34,6 +40,7 @@ public class BankTellingService extends JPanel{
             Scanner infoGetter = new Scanner(userDetails);
             while(infoGetter.hasNextLine()){
                 String info = infoGetter.nextLine();
+                CreateNewAccount(info);
                 System.out.println(info);
             }
             infoGetter.close();
@@ -41,12 +48,28 @@ public class BankTellingService extends JPanel{
             System.out.println("fail");
         }
     }
-    public void CreateNewAccount(){
-
+    public void CreateNewAccount(String customerInfo){
+        Accounts.ACCOUNTS accountType = null;
+        String[] individualInfo = customerInfo.split(",");
+        switch (individualInfo[3]) {
+            case "Savings":
+                accountType  = Accounts.ACCOUNTS.Savings;
+            break;
+            case "Everyday":
+                accountType = Accounts.ACCOUNTS.Everyday;
+            break;
+            case "Current":
+                accountType = Accounts.ACCOUNTS.Current;
+            break;
+        }
+        Double balance = Double.parseDouble(individualInfo[4]);
+        users.add(new Accounts(individualInfo[0],individualInfo[1],individualInfo[2],accountType,balance));
     }
+    /*
+     *  
+     */
     public String CharacterEntered(char character, int charVal){
-        System.out.println("sent: "+input);
-        if(charVal == 10){
+        if(charVal == enterKeyVal){
             return input;
         }else if((charVal == 8)&&(typedChars.length > 0)){
             typedChars = SizeChanger(typedChars,false,character);
@@ -56,7 +79,6 @@ public class BankTellingService extends JPanel{
         input ="";
         for(int i = 0; i < typedChars.length; i++){
             input = input + typedChars[i]; 
-            System.out.println(input);
         }
         repaint();
         return "r";
