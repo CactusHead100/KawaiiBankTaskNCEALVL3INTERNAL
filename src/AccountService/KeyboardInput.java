@@ -26,7 +26,7 @@ public class KeyboardInput implements KeyListener{
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(correctInput(e.getKeyCode())){
+        if(correctInput(e.getKeyCode(),false)){
             input = bankTellingService.CharacterEntered(e.getKeyChar(),e.getKeyCode());
             bankTellingService.invalidText = false;
         }else{
@@ -44,12 +44,17 @@ public class KeyboardInput implements KeyListener{
         
     }
     
-    private boolean correctInput(int charKeyCode){
-        if((charKeyCode == keyCodeExceptionSpace)||(charKeyCode == keyCodeExceptionEnter)||((charKeyCode >= keyCodeA)&&(charKeyCode <= keyCodeZ))||((charKeyCode >= keyCode0)&&(charKeyCode <= keycode9))||((charKeyCode == keyCodeExceptionBackspace)&&(bankTellingService.typedChars.length != 0))){
-            return true;
+    private boolean correctInput(int charKeyCode, boolean numOnly){
+        if(numOnly){
+            if((charKeyCode == keyCodeExceptionEnter)||((charKeyCode >= keyCode0)&&(charKeyCode <= keycode9))||((charKeyCode == keyCodeExceptionBackspace)&&(bankTellingService.typedChars.length != 0))){
+                return true;
+            }
+            return false;
+        }else{
+            if((charKeyCode == keyCodeExceptionSpace)||(charKeyCode == keyCodeExceptionEnter)||((charKeyCode >= keyCodeA)&&(charKeyCode <= keyCodeZ))||((charKeyCode >= keyCode0)&&(charKeyCode <= keycode9))||((charKeyCode == keyCodeExceptionBackspace)&&(bankTellingService.typedChars.length != 0))){
+                return true;
+            }
+            return false;
         }
-        System.out.println("false");
-        return false;
     }
-
 }
