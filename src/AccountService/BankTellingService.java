@@ -18,8 +18,17 @@ public class BankTellingService extends JPanel{
 
     final int canvasHeight = 640;
     final int canvasWidth = 640;
-
+    final Color backgroundColor = Color.white;
+    
     final int textHorizontalPlacement = (canvasWidth/4);
+    final int textVerticalPlacement = (canvasHeight/2);
+    final int typedTextSize = 25;
+    final Color textColor = Color.black;
+    final int textBoxX = textHorizontalPlacement-5;
+    final int textBoxY = (canvasHeight/2)-typedTextSize;
+    final int textBoxWidth = canvasWidth/2+10;
+    final int textBoxHeight = typedTextSize+5;
+    final int textBoxCurviness = 20;
 
     File userDetails =  new File("src//AccountService//UserInfo.csv");
     HashMap<String,Accounts> users = new HashMap<String,Accounts>();
@@ -113,15 +122,22 @@ public class BankTellingService extends JPanel{
         Graphics2D g2d = (Graphics2D) g;
         g2d.clearRect(0,0,canvasWidth, canvasHeight);
 
+        /*
+         * specifies the asthetics of the text then draws it 
+         */
+        g2d.setColor(textColor);
+        g2d.setFont(new Font("Arial", Font.PLAIN, typedTextSize));
+        g2d.drawString(input,textHorizontalPlacement,textVerticalPlacement);
+        /*
+         * coveers any text exiting the box allowing for a smooth clean feel
+         */
+        g2d.setColor(backgroundColor);
+        g2d.fillRect(textBoxX+textBoxWidth, textBoxY, textHorizontalPlacement, textBoxHeight);
+        /*
+         * Drawws the text box to indicate where to type
+         */
         g2d.setColor(Color.black);
-
-        g2d.setFont(new Font("Arial", Font.PLAIN, 25));
-        g2d.drawString(input,textHorizontalPlacement,canvasHeight/2);
-
-        g2d.setColor(Color.white);
-        g2d.fillRect(textHorizontalPlacement+canvasWidth/2+5, (canvasHeight/2)-25, canvasWidth/4-5, 30);
-        g2d.setColor(Color.black);
-        g2d.drawRoundRect(textHorizontalPlacement-5, (canvasHeight/2)-25, canvasWidth/2+10, 30, 20, 20);
+        g2d.drawRoundRect(textBoxX, textBoxY, textBoxWidth, textBoxHeight, textBoxCurviness, textBoxCurviness);
 
         if(invalidText){
             g2d.setColor(Color.red);
