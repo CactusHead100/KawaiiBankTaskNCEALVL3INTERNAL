@@ -23,7 +23,7 @@ public class MouseInput implements MouseListener, MouseMotionListener{
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(bankTellingService.currentScreen == Screen.OptionMenu){
+        if((bankTellingService.currentScreen == Screen.OptionMenu)||(bankTellingService.currentScreen == Screen.BalanceChecker)){
             bankTellingService.clickOccurred(e.getX(),e.getY());
             
         }

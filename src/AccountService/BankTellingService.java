@@ -58,14 +58,16 @@ public class BankTellingService extends JPanel{
     final int buttonTextSize = 35;
     final int buttonTextOffeset = 3;
     final String[] buttonText = {"Veiw Balance","Deposit or Withdraw","Create Account","Delete Account","End Day"};
-    Buttons buttons[] = new Buttons[numberOfButtons];
+    Buttons buttons[];
     /*
      * The file being initialized and a dictionary as to me it makes it very easy accessing people's accounts (using the key)
      */
     File userDetails =  new File("src//AccountService//UserInfo.csv");
     HashMap<String,Accounts> users = new HashMap<String,Accounts>();
-    
-    Boolean invalidText = false;
+    /*
+     * A balance variable that is set then drawn when in the balance screen 
+     */
+    private String veiwedBalance = "";
     /*
      * to track mouse position so we can know if i clicked something correctly
      */
@@ -101,10 +103,12 @@ public class BankTellingService extends JPanel{
      * creates menu buttons so that we can get back to the menu easily
      */
     public void createMenuButtons(){
+        buttons = new Buttons[numberOfButtons];
         buttons[0] = new Buttons(buttonX, buttonGap+headerSize, buttonWidth, buttonHeight, textBoxCurviness, buttonText[0]);
         for(int i = 1; i < numberOfButtons;i++){
             buttons[i] = new Buttons(buttonX, buttonGap*(2*i+1)+buttonHeight*i+headerSize, buttonWidth, buttonHeight, textBoxCurviness, buttonText[i]);
         }
+        input = "";
     }
     /*
      * takes a string (a line read prior from the csv file) and splits it down into the variables we want then creates an object containg them all
@@ -134,9 +138,26 @@ public class BankTellingService extends JPanel{
     }
 
     public void clickOccurred(int x, int y){
-        if(buttons[0].isClicked(x,y)){
-            currentScreen = Screen.BalanceChecker;
-            repaint();
+        switch (currentScreen) {
+            case Screen.OptionMenu:
+                if(buttons[0].isClicked(x,y)){
+                    currentScreen = Screen.BalanceChecker;
+                    /*
+                    * 
+                    */
+                    buttons = new Buttons[1];
+                    buttons[0] = new Buttons(buttonX, buttonGap*9+buttonHeight*4+headerSize, buttonWidth, buttonHeight, textBoxCurviness, "Return to Menu");
+                    repaint();
+                }
+            break;
+            case Screen.BalanceChecker:
+                if(buttons[0].isClicked(x,y)){
+                    currentScreen = Screen.OptionMenu;
+                    createMenuButtons();
+                    repaint();
+                }
+            default:
+                break;
         }
     }
 
@@ -145,6 +166,7 @@ public class BankTellingService extends JPanel{
             case Screen.BalanceChecker:
             try {
                 System.out.println(users.get(input).balance);
+                veiwedBalance = Double.toString(users.get(input).balance);
             } catch (Exception e) {
                 System.out.println("Sorry couldn't find that name");
             }
@@ -207,14 +229,32 @@ public class BankTellingService extends JPanel{
         /*
          * specifies the asthetics of the text then draws it 
          */
-        if(currentScreen == Screen.OptionMenu){
-            for(int i = 0; i < buttons.length;i++){
+        switch (currentScreen) {
+            case Screen.OptionMenu:
+                for(int i = 0; i < buttons.length;i++){
+                    g2d.setColor(Color.green);
+                    g2d.fill(buttons[i].shape);
+                    g2d.setColor(textColor);
+                    g2d.setFont(new Font("Arial", Font.PLAIN, buttonTextSize));
+                    g2d.drawString(buttons[i].text,buttons[i].x+buttonTextOffeset,buttons[i].y+buttonTextSize+buttonTextOffeset*2);
+                }
+            break;
+            case Screen.BalanceChecker:
+                /*
+                * Draws the buttons on the Balance Checker Screen
+                */
                 g2d.setColor(Color.green);
-                g2d.fill(buttons[i].shape);
+                g2d.fill(buttons[0].shape);
                 g2d.setColor(textColor);
                 g2d.setFont(new Font("Arial", Font.PLAIN, buttonTextSize));
-                g2d.drawString(buttons[i].text,buttons[i].x+buttonTextOffeset,buttons[i].y+buttonTextSize+buttonTextOffeset*2);
-            }
+                g2d.drawString(buttons[0].text,buttons[0].x+buttonTextOffeset,buttons[0].y+buttonTextSize+buttonTextOffeset*2);
+                /*
+                 * drawing the balance number
+                 */
+                g2d.setFont(new Font("Arial", Font.PLAIN, 80));
+                g2d.drawString("$"+veiwedBalance, canvasWidth/8,canvasHeight*3/4);
+            default:
+                break;
         }
         if((currentScreen != Screen.OptionMenu)&&(currentScreen != Screen.EndDay)){
             g2d.setColor(textColor);
@@ -231,11 +271,6 @@ public class BankTellingService extends JPanel{
             g2d.setColor(textColor);
             g2d.drawRoundRect(textBoxX, textBoxY, textBoxWidth, textBoxHeight, textBoxCurviness, textBoxCurviness);
 
-            if(invalidText){
-                g2d.setColor(Color.red);
-                g2d.setFont(new Font("Arial", Font.BOLD, 30));
-                g2d.drawString("INVALID",canvasWidth/2-50,canvasHeight/2+50);
-            }
         }
     }
 }

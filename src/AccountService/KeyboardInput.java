@@ -15,6 +15,7 @@ public class KeyboardInput implements KeyListener{
     private int keyCodeExceptionBackspace = 8;
     private int keyCodeExceptionEnter = 10;
     private int keyCodeExceptionSpace = 32;
+    private int keyCodeExceptionPeriod = 46;
 
     private BankTellingService bankTellingService;
     public KeyboardInput(BankTellingService bankTellingService){
@@ -32,14 +33,13 @@ public class KeyboardInput implements KeyListener{
         if((bankTellingService.currentScreen != Screen.OptionMenu)&&(bankTellingService.currentScreen != Screen.EndDay)){
             if(correctInput(e.getKeyCode(),false)){
                 nextChar = bankTellingService.CharacterEntered(e.getKeyChar(),e.getKeyCode());
-                bankTellingService.invalidText = false;
             }else{
-                bankTellingService.invalidText = true;
                 bankTellingService.repaint();
             }
             if(nextChar){
                 bankTellingService.input = "";
                 bankTellingService.typedChars = new char[0];
+                bankTellingService.repaint();
             }
         }
     }
@@ -56,7 +56,7 @@ public class KeyboardInput implements KeyListener{
             }
             return false;
         }else{
-            if((charKeyCode == keyCodeExceptionSpace)||(charKeyCode == keyCodeExceptionEnter)||((charKeyCode >= keyCodeA)&&(charKeyCode <= keyCodeZ))||((charKeyCode >= keyCode0)&&(charKeyCode <= keycode9))||((charKeyCode == keyCodeExceptionBackspace)&&(bankTellingService.typedChars.length != 0))){
+            if((charKeyCode == keyCodeExceptionSpace)||(charKeyCode == keyCodeExceptionPeriod)||(charKeyCode == keyCodeExceptionEnter)||((charKeyCode >= keyCodeA)&&(charKeyCode <= keyCodeZ))||((charKeyCode >= keyCode0)&&(charKeyCode <= keycode9))||((charKeyCode == keyCodeExceptionBackspace)&&(bankTellingService.typedChars.length != 0))){
                 return true;
             }
             return false;
