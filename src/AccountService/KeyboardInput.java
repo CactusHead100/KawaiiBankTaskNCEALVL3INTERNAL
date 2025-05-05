@@ -3,8 +3,10 @@ package AccountService;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import AccountService.BankTellingService.Screen;
+
 public class KeyboardInput implements KeyListener{
-    private String input;
+    private Boolean nextChar;
 
     private int keyCodeA = 65;
     private int keyCodeZ = 90;
@@ -26,16 +28,19 @@ public class KeyboardInput implements KeyListener{
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(correctInput(e.getKeyCode(),false)){
-            input = bankTellingService.CharacterEntered(e.getKeyChar(),e.getKeyCode());
-            bankTellingService.invalidText = false;
-        }else{
-            bankTellingService.invalidText = true;
-            bankTellingService.repaint();
-        }
-        if(input != "r"){
-            bankTellingService.input = "";
-            bankTellingService.typedChars = new char[0];
+        System.out.println("keyPressed");
+        if((bankTellingService.currentScreen != Screen.OptionMenu)&&(bankTellingService.currentScreen != Screen.EndDay)){
+            if(correctInput(e.getKeyCode(),false)){
+                nextChar = bankTellingService.CharacterEntered(e.getKeyChar(),e.getKeyCode());
+                bankTellingService.invalidText = false;
+            }else{
+                bankTellingService.invalidText = true;
+                bankTellingService.repaint();
+            }
+            if(nextChar){
+                bankTellingService.input = "";
+                bankTellingService.typedChars = new char[0];
+            }
         }
     }
 

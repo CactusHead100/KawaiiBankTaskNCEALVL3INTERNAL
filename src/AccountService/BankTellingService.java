@@ -4,22 +4,39 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.io.IOException;
+import java.io.StreamCorruptedException;
+import java.lang.StackWalker.Option;
 
+import javax.lang.model.SourceVersion;
 import javax.swing.JPanel;
 
 public class BankTellingService extends JPanel{
     private KeyboardInput keyboardInput = new KeyboardInput(this);
-
+    private MouseInput mouseInput = new MouseInput(this);
+    /*
+     * the keycode value for the enter key
+     */
     final int enterKeyVal = 10;
-
+    /*
+     * the canvas size in pixels and the background colour i want (should be pretty obvious...)
+     */
     final int canvasHeight = 640;
     final int canvasWidth = 640;
-    final Color backgroundColor = Color.white;
-    
+    final Color backgroundColor = Color.cyan;
+    /*
+     * A screen enum containing the different states the program could be in
+     */
+    public enum Screen{OptionMenu, BalanceChecker, BallanceWithdraw, BalanceDeposit, AccountCreater, AccountDeleter, EndDay};
+    public Screen currentScreen = Screen.OptionMenu;
+    /*
+     * placement for the text and textbox on the canvas and other related things
+     */
     final int textHorizontalPlacement = (canvasWidth/4);
     final int textVerticalPlacement = (canvasHeight/2);
     final int typedTextSize = 25;
@@ -29,21 +46,46 @@ public class BankTellingService extends JPanel{
     final int textBoxWidth = canvasWidth/2+10;
     final int textBoxHeight = typedTextSize+5;
     final int textBoxCurviness = 20;
-
+    /*
+     * Creates an array of rectangles
+     */
+    final int numberOfButtons = 5;
+    final int buttonX = canvasWidth/4;
+    final int buttonWidth = canvasWidth/2;
+    final int buttonHeight = 60;
+    final int headerSize = buttonHeight*2;
+    final int buttonGap = ((canvasHeight-headerSize)/numberOfButtons - buttonHeight)/2;
+    final int buttonTextSize = 35;
+    final int buttonTextOffeset = 3;
+    final String[] buttonText = {"Veiw Balance","Deposit or Withdraw","Create Account","Delete Account","End Day"};
+    Buttons buttons[] = new Buttons[numberOfButtons];
+    /*
+     * The file being initialized and a dictionary as to me it makes it very easy accessing people's accounts (using the key)
+     */
     File userDetails =  new File("src//AccountService//UserInfo.csv");
     HashMap<String,Accounts> users = new HashMap<String,Accounts>();
-
+    
     Boolean invalidText = false;
-
+    /*
+     * to track mouse position so we can know if i clicked something correctly
+     */
     int mouseX;
     int mouseY;
-
+    /*
+     * create a array of characters as it makes it easy to delete the last inputted one and a string so i can do stuff wit hwhat they typed
+     */
     char[] typedChars = new char[0];
     String input = "";
-
-    String keyBoardInput;
+    /*
+     * allows for keyboard input
+     */
     BankTellingService (){
         addKeyListener(keyboardInput);
+        addMouseListener(mouseInput);
+        addMouseMotionListener(mouseInput);
+        /*
+         * Passes infomation from the file to the account creator which creates accounts using this data
+         */
         try{
             Scanner infoGetter = new Scanner(userDetails);
             while(infoGetter.hasNextLine()){
@@ -52,6 +94,16 @@ public class BankTellingService extends JPanel{
             }
             infoGetter.close();
         }catch(IOException e){
+        }
+        createMenuButtons();
+    }
+    /*
+     * creates menu buttons so that we can get back to the menu easily
+     */
+    public void createMenuButtons(){
+        buttons[0] = new Buttons(buttonX, buttonGap+headerSize, buttonWidth, buttonHeight, textBoxCurviness, buttonText[0]);
+        for(int i = 1; i < numberOfButtons;i++){
+            buttons[i] = new Buttons(buttonX, buttonGap*(2*i+1)+buttonHeight*i+headerSize, buttonWidth, buttonHeight, textBoxCurviness, buttonText[i]);
         }
     }
     /*
@@ -74,17 +126,40 @@ public class BankTellingService extends JPanel{
         Double balance = Double.parseDouble(individualInfo[4]);
         users.put(individualInfo[0],new Accounts(individualInfo[0],individualInfo[1],individualInfo[2],accountType,balance));
     }
+    /*
+     * delets the account (who would've thought???)
+     */
     public void DeleteAccount(String accountName){
-        System.out.println("Current Users: "+users);
         users.remove(accountName);
-        System.out.println("Current Users: "+users);
+    }
+
+    public void clickOccurred(int x, int y){
+        if(buttons[0].isClicked(x,y)){
+            currentScreen = Screen.BalanceChecker;
+            repaint();
+        }
+    }
+
+    public void responseToInput(String input){
+        switch (currentScreen) {
+            case Screen.BalanceChecker:
+            try {
+                System.out.println(users.get(input).balance);
+            } catch (Exception e) {
+                System.out.println("Sorry couldn't find that name");
+            }
+                break;
+            default:
+                break;
+        }
     }
     /*
      * A method that calls another depending on whether it wants to add or decrease characters in an array then returns the string back to where it was first called.
      */
-    public String CharacterEntered(char character, int charVal){
+    public Boolean CharacterEntered(char character, int charVal){
         if(charVal == enterKeyVal){
-            return input;
+            responseToInput(input);
+            return true;
         }else if((charVal == 8)&&(typedChars.length > 0)){
             typedChars = SizeChanger(typedChars,false,character);
         }else{
@@ -95,7 +170,7 @@ public class BankTellingService extends JPanel{
             input = input + typedChars[i]; 
         }
         repaint();
-        return "r";
+        return false;
     }
     /*
      * creates a new array either one bigger or smaller then the old one and copies the old information over and either adds the next character or deletes one
@@ -120,29 +195,47 @@ public class BankTellingService extends JPanel{
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
+        /*
+         * clears all previous drawings so that they don't stack infinitly every time i draw (not sure if this could be lag inducing but it helps me mentally asses my code)
+         */
         g2d.clearRect(0,0,canvasWidth, canvasHeight);
-
+        /*
+         * draws a background (had trouble previously trying to set canvas colour so eceided to instead draw my own background)
+         */
+        g2d.setColor(backgroundColor);
+        g2d.fillRect(0,0,canvasHeight,canvasWidth);
         /*
          * specifies the asthetics of the text then draws it 
          */
-        g2d.setColor(textColor);
-        g2d.setFont(new Font("Arial", Font.PLAIN, typedTextSize));
-        g2d.drawString(input,textHorizontalPlacement,textVerticalPlacement);
-        /*
-         * coveers any text exiting the box allowing for a smooth clean feel
-         */
-        g2d.setColor(backgroundColor);
-        g2d.fillRect(textBoxX+textBoxWidth, textBoxY, textHorizontalPlacement, textBoxHeight);
-        /*
-         * Drawws the text box to indicate where to type
-         */
-        g2d.setColor(Color.black);
-        g2d.drawRoundRect(textBoxX, textBoxY, textBoxWidth, textBoxHeight, textBoxCurviness, textBoxCurviness);
+        if(currentScreen == Screen.OptionMenu){
+            for(int i = 0; i < buttons.length;i++){
+                g2d.setColor(Color.green);
+                g2d.fill(buttons[i].shape);
+                g2d.setColor(textColor);
+                g2d.setFont(new Font("Arial", Font.PLAIN, buttonTextSize));
+                g2d.drawString(buttons[i].text,buttons[i].x+buttonTextOffeset,buttons[i].y+buttonTextSize+buttonTextOffeset*2);
+            }
+        }
+        if((currentScreen != Screen.OptionMenu)&&(currentScreen != Screen.EndDay)){
+            g2d.setColor(textColor);
+            g2d.setFont(new Font("Arial", Font.PLAIN, typedTextSize));
+            g2d.drawString(input,textHorizontalPlacement,textVerticalPlacement);
+            /*
+            * coveers any text exiting the box allowing for a smooth clean feel
+            */
+            g2d.setColor(backgroundColor);
+            g2d.fillRect(textBoxX+textBoxWidth, textBoxY, textHorizontalPlacement, textBoxHeight);
+            /*
+            * Drawws the text box to indicate where to type
+            */
+            g2d.setColor(textColor);
+            g2d.drawRoundRect(textBoxX, textBoxY, textBoxWidth, textBoxHeight, textBoxCurviness, textBoxCurviness);
 
-        if(invalidText){
-            g2d.setColor(Color.red);
-            g2d.setFont(new Font("Arial", Font.BOLD, 30));
-            g2d.drawString("INVALID",canvasWidth/2-50,canvasHeight/2+50);
+            if(invalidText){
+                g2d.setColor(Color.red);
+                g2d.setFont(new Font("Arial", Font.BOLD, 30));
+                g2d.drawString("INVALID",canvasWidth/2-50,canvasHeight/2+50);
+            }
         }
     }
 }
