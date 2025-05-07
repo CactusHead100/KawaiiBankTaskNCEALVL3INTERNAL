@@ -18,5 +18,32 @@ public class Accounts{
         this.balance = balance;
         System.out.println(ACCOUNTTYPE);
     }
-
+    public boolean siphonMoney(Double amount, boolean withdrawing){
+        System.out.println(this.ACCOUNTTYPE);
+        switch (this.ACCOUNTTYPE) {
+            case ACCOUNTS.Everyday:
+            System.out.println(amount);
+                if((withdrawing)&&(amount<5000)&&(this.balance-amount>0)){
+                    this.balance-=amount;
+                }else if(!withdrawing){
+                    this.balance+=amount;
+                }
+                return true;
+            case ACCOUNTS.Savings:
+            if((withdrawing)&&(amount<5000)&&(this.balance-amount>0)){
+                this.balance-=amount;
+            }else if(!withdrawing){
+                this.balance+=amount;
+            }
+            return true;
+            case ACCOUNTS.Current:
+            if((withdrawing)&&(amount<5000)&&(this.balance-amount>-1000)){
+                this.balance-=amount;
+            }else if(!withdrawing){
+                this.balance+=amount;
+            }
+            return true;
+        }
+        return false;
+    }
 }

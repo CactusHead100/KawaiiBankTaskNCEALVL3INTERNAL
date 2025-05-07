@@ -8,7 +8,7 @@ public class Buttons {
      */
     public int x;
     public int y;
-    private int width;
+    public int width;
     private int height;
     private int curviness;
     public String text;
