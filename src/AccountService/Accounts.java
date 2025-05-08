@@ -27,22 +27,28 @@ public class Accounts{
             System.out.println(amount);
                 if((withdrawing)&&(amount<=maxWithdrawl)&&(this.balance-amount>=0)){
                     this.balance-=amount;
+                    BankTellingService.totalWithdrawls+=amount;
                 }else if(!withdrawing){
                     this.balance+=amount;
+                    BankTellingService.totalDeposits+=amount;
                 }
                 return true;
             case ACCOUNTS.Savings:
             if((withdrawing)&&(amount<=maxWithdrawl)&&(this.balance-amount>=0)){
                 this.balance-=amount;
+                BankTellingService.totalWithdrawls+=amount;
             }else if(!withdrawing){
                 this.balance+=amount;
+                BankTellingService.totalDeposits+=amount;
             }
             return true;
             case ACCOUNTS.Current:
             if((withdrawing)&&(amount<=maxWithdrawl)&&(this.balance-amount>=-maxOverdraft)){
                 this.balance-=amount;
+                BankTellingService.totalWithdrawls+=amount;
             }else if(!withdrawing){
                 this.balance+=amount;
+                BankTellingService.totalDeposits+=amount;
             }
             return true;
         }

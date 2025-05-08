@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.font.FontRenderContext;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 import java.util.HashMap;
@@ -64,6 +65,12 @@ public class BankTellingService extends JPanel{
     final String[] buttonText = {"Veiw Balance","Deposit or Withdraw","Create Account","Delete Account","End Day","Return to Menu","Deposit","Withdraw"};
     Buttons buttons[];
     /*
+     * used for text expressed right below the text input box
+     */
+    final int generalFontSize = 40;
+    final int generalFontPlacement = canvasHeight*5/8;
+    final Font generalFont = new Font("Arial", Font.PLAIN, generalFontSize);
+    /*
      * The file being initialized and a dictionary as to me it makes it very easy accessing people's accounts (using the key)
      */
     File userDetails =  new File("src//AccountService//UserInfo.csv");
@@ -77,6 +84,11 @@ public class BankTellingService extends JPanel{
      */
     private boolean foundUser = false;
     private String currentUserInfo[];
+    /*
+     * used to track overall withdrawls and deposits so i can express them when the day ends
+     */
+    public static Double totalWithdrawls = 0.0;
+    public static Double totalDeposits = 0.0;
     /*
      * to track mouse position so we can know if i clicked something correctly
      */
@@ -167,12 +179,20 @@ public class BankTellingService extends JPanel{
                     repaint();
                 }else if(buttons[2].isClicked(x,y)){
                     currentScreen = Screen.AccountCreater;
+
                     currentUserInfo = new String[4];
                     createBackToMenuButton(1);
                     textToDraw = "Enter Name";
                 }else if(buttons[3].isClicked(x,y)){
                     currentScreen = Screen.AccountDeleter;
+
                     createBackToMenuButton(1);
+                }else if(buttons[4].isClicked(x, y)){
+                    currentScreen = Screen.EndDay;
+
+                    buttons = new Buttons[1];
+                    buttons[0] = new Buttons(buttonX, buttonGap*9+buttonHeight*4+headerSize, buttonWidth, buttonHeight, textBoxCurviness, "Exit");
+                    repaint();
                 }
             break;
             case Screen.BalanceChecker:
@@ -195,8 +215,9 @@ public class BankTellingService extends JPanel{
             case Screen.AccountDeleter:
                 backToMenu(x, y);
             break;
-            default:
-                break;
+            case Screen.EndDay:
+                System.exit(0);
+            break;
         }
     }
     /*
@@ -376,9 +397,16 @@ public class BankTellingService extends JPanel{
             g2d.setColor(textColor);
             g2d.drawRoundRect(textBoxX, textBoxY, textBoxWidth, textBoxHeight, textBoxCurviness, textBoxCurviness);
             if(currentScreen != Screen.OptionMenu){
-                g2d.setFont(new Font("Arial", Font.PLAIN, 40));
-                g2d.drawString(textToDraw, (canvasWidth-(int)(new Font("Arial", Font.PLAIN, 40).getStringBounds(textToDraw,frc).getWidth()))/2,canvasHeight*5/8);
+                g2d.setFont(new Font("Arial", Font.PLAIN, generalFontSize));
+                g2d.drawString(textToDraw, (canvasWidth-(int)(generalFont.getStringBounds(textToDraw,frc).getWidth()))/2,generalFontPlacement);
             }
+        }else if(currentScreen == Screen.EndDay){
+            g2d.setFont(new Font("Arial", Font.PLAIN, generalFontSize));
+            g2d.drawString("Total Deposits: ", (canvasWidth-(int)(generalFont.getStringBounds("Total Deposits: ".toString(),frc).getWidth()))/2,canvasHeight/8);
+            g2d.drawString(totalDeposits.toString(), (canvasWidth-(int)(generalFont.getStringBounds(totalDeposits.toString().toString(),frc).getWidth()))/2,canvasHeight*2/8);
+            g2d.drawString("Total Withdrawls: ", (canvasWidth-(int)(generalFont.getStringBounds("Total Withdrawls: ".toString(),frc).getWidth()))/2,canvasHeight*4/8);
+            g2d.drawString(totalWithdrawls.toString(), (canvasWidth-(int)(generalFont.getStringBounds(totalWithdrawls.toString(),frc).getWidth()))/2,canvasHeight*6/8);
+            
         }
     }
 }
