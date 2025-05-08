@@ -9,8 +9,12 @@ import java.awt.font.FontRenderContext;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.RoundRectangle2D;
 import java.io.File;
+import java.io.FileWriter;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 import java.io.IOException;
 import java.io.StreamCorruptedException;
 import java.lang.StackWalker.Option;
@@ -65,16 +69,20 @@ public class BankTellingService extends JPanel{
     final String[] buttonText = {"Veiw Balance","Deposit or Withdraw","Create Account","Delete Account","End Day","Return to Menu","Deposit","Withdraw"};
     Buttons buttons[];
     /*
-     * used for text expressed right below the text input box
+     * used for text expressed right below the text input box and above it
      */
     final int generalFontSize = 40;
     final int generalFontPlacement = canvasHeight*5/8;
     final Font generalFont = new Font("Arial", Font.PLAIN, generalFontSize);
+    final int headerFontSize = 80;
+    final int headerFontPlacement = canvasHeight*5/32;
+    final Font headerFont = new Font("Arial", Font.PLAIN, headerFontSize);
     /*
      * The file being initialized and a dictionary as to me it makes it very easy accessing people's accounts (using the key)
      */
     File userDetails =  new File("src//AccountService//UserInfo.csv");
     HashMap<String,Accounts> users = new HashMap<String,Accounts>();
+    final String bankNumber = "08-0104-0";
     /*
      * A balance variable that is set then drawn when in the balance screen 
      */
@@ -163,15 +171,9 @@ public class BankTellingService extends JPanel{
             case Screen.OptionMenu:
                 if(buttons[0].isClicked(x,y)){
                     currentScreen = Screen.BalanceChecker;
-                    /*
-                    * deletes previous buttons and creates the new one
-                    */
-                    buttons = new Buttons[1];
-                    buttons[0] = new Buttons(buttonX, buttonGap*9+buttonHeight*4+headerSize, buttonWidth, buttonHeight, textBoxCurviness, buttonText[5]);
-                    repaint();
+                    createBackToMenuButton(1);
                 }else if(buttons[1].isClicked(x,y)){
                     currentScreen = Screen.BalanceChanger;
-
                     foundUser = false;
                     createBackToMenuButton(3);
                     buttons[1] = new Buttons(canvasWidth/16, buttonGap*7+buttonHeight*3+headerSize, buttonWidth*3/4, buttonHeight, textBoxCurviness, buttonText[6]);
@@ -180,9 +182,8 @@ public class BankTellingService extends JPanel{
                 }else if(buttons[2].isClicked(x,y)){
                     currentScreen = Screen.AccountCreater;
 
-                    currentUserInfo = new String[4];
+                    currentUserInfo = new String[3];
                     createBackToMenuButton(1);
-                    textToDraw = "Enter Name";
                 }else if(buttons[3].isClicked(x,y)){
                     currentScreen = Screen.AccountDeleter;
 
@@ -190,6 +191,7 @@ public class BankTellingService extends JPanel{
                 }else if(buttons[4].isClicked(x, y)){
                     currentScreen = Screen.EndDay;
 
+                    writeBackToFile();
                     buttons = new Buttons[1];
                     buttons[0] = new Buttons(buttonX, buttonGap*9+buttonHeight*4+headerSize, buttonWidth, buttonHeight, textBoxCurviness, "Exit");
                     repaint();
@@ -221,11 +223,28 @@ public class BankTellingService extends JPanel{
         }
     }
     /*
+     * writes the current data back to file
+     */
+    private void writeBackToFile(){
+        Set<String> setOfUsers = users.keySet();
+            try {
+                FileWriter fileWriter = new FileWriter(userDetails);
+                for(String key : setOfUsers){
+                    fileWriter.write(users.get(key).returnInfo()+"\n");
+                }
+                fileWriter.flush();
+                    fileWriter.close();
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+    /*
      * creates a button that leads back to the menu 
      */
     private void createBackToMenuButton(int numberToCreate){
         buttons = new Buttons[numberToCreate];
         buttons[0] = new Buttons(buttonX, buttonGap*9+buttonHeight*4+headerSize, buttonWidth, buttonHeight, textBoxCurviness, buttonText[5]);
+        textToDraw = "Enter Account Name";
         repaint();
     }
     /*
@@ -290,15 +309,14 @@ public class BankTellingService extends JPanel{
                     }
                 }else if(currentUserInfo[1] == null){
                     currentUserInfo[1] = input;
-                    textToDraw = "Enter Account Number";
-                }else if(currentUserInfo[2] == null){
-                    currentUserInfo[2] = input;
                     textToDraw = "Enter Account Type";
-                }else if(currentUserInfo[3] == null){
+                }else if(currentUserInfo[2] == null){
                     if((input.equals("Savings"))||input.equals("Current")||input.equals("Everyday")){
-                        currentUserInfo[3] = input;
+                        currentUserInfo[2] = input;
                         if(!users.containsKey(currentUserInfo[0])){
-                            CreateNewAccount(currentUserInfo[0]+","+currentUserInfo[1]+","+currentUserInfo[2]+","+currentUserInfo[3]+",0");
+                            uniqueNumberCreator();
+                    
+                            CreateNewAccount(currentUserInfo[0]+","+currentUserInfo[1]+","+uniqueNumberCreator()+","+currentUserInfo[2]+",0");
                             textToDraw = "Success";
                             currentUserInfo = new String[4];
                         }
@@ -314,6 +332,25 @@ public class BankTellingService extends JPanel{
                 }
             break;         
         }
+    }
+    /*
+     * creates a unique bank number
+     */
+    private String uniqueNumberCreator(){
+        Set<String> setOfUsers = users.keySet();
+        Random randNum = new Random();
+        String sixDigitNumber = Integer.toString(randNum.nextInt(0,10))+Integer.toString(randNum.nextInt(0,10))+
+        Integer.toString(randNum.nextInt(0,10))+Integer.toString(randNum.nextInt(0,10))+
+        Integer.toString(randNum.nextInt(0,10))+Integer.toString(randNum.nextInt(0,10));
+        
+        for(String key : setOfUsers){
+            if(!users.get(key).ACCOUNTNUMBER.equals(bankNumber+sixDigitNumber+"00")){
+                return bankNumber+sixDigitNumber+"-00";
+            }else{
+                return uniqueNumberCreator();
+            }
+        }
+        return "";
     }
     /*
      * A method that calls another depending on whether it wants to add or decrease characters in an array then returns the string back to where it was first called.
@@ -353,7 +390,9 @@ public class BankTellingService extends JPanel{
             return newString;
         }
     }
-
+    /*
+     * a paint class that draws everything on the canvas 
+     */
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
@@ -379,13 +418,33 @@ public class BankTellingService extends JPanel{
             g2d.drawString(buttons[i].text,((buttons[i].x+(buttons[i].width/2))-((int)buttonTextFont.getStringBounds(buttons[i].text,frc).getWidth())/2),//gets the width of the string and then uses that to center it on the canvas
             buttons[i].y+buttonTextSize+buttonTextOffeset*2);
         }
-        /*
-         * draws the text box and text for all pages apart from menu and end screen
-         */
         if((currentScreen != Screen.OptionMenu)&&(currentScreen != Screen.EndDay)){
+            String headerText="";
+            switch (currentScreen) {
+                case Screen.BalanceChecker:
+                    headerText = headers[1];
+                break;
+                case Screen.BalanceChanger:
+                    headerText = headers[2];
+                break;
+                case Screen.AccountCreater:
+                    headerText = headers[3];
+                break;
+                case Screen.AccountDeleter:
+                    headerText = headers[4];
+                break;
+            }
+            /*
+            * draws the text box and text for all pages apart from menu and end screen that's under the input box
+            */
             g2d.setColor(textColor);
             g2d.setFont(typedTextFont);
             g2d.drawString(input,textHorizontalPlacement,textVerticalPlacement);
+            /* 
+             * Draws the Header for each Screen
+            */
+            g2d.setFont(headerFont);
+            g2d.drawString(headerText,(canvasWidth-(int)(headerFont.getStringBounds(headerText,frc).getWidth()))/2,headerFontPlacement);
             /*
             * coveers any text exiting the box allowing for a smooth clean feel
             */
@@ -397,16 +456,18 @@ public class BankTellingService extends JPanel{
             g2d.setColor(textColor);
             g2d.drawRoundRect(textBoxX, textBoxY, textBoxWidth, textBoxHeight, textBoxCurviness, textBoxCurviness);
             if(currentScreen != Screen.OptionMenu){
-                g2d.setFont(new Font("Arial", Font.PLAIN, generalFontSize));
+                g2d.setFont(generalFont);
                 g2d.drawString(textToDraw, (canvasWidth-(int)(generalFont.getStringBounds(textToDraw,frc).getWidth()))/2,generalFontPlacement);
             }
         }else if(currentScreen == Screen.EndDay){
-            g2d.setFont(new Font("Arial", Font.PLAIN, generalFontSize));
+            g2d.setFont(generalFont);
             g2d.drawString("Total Deposits: ", (canvasWidth-(int)(generalFont.getStringBounds("Total Deposits: ".toString(),frc).getWidth()))/2,canvasHeight/8);
-            g2d.drawString(totalDeposits.toString(), (canvasWidth-(int)(generalFont.getStringBounds(totalDeposits.toString().toString(),frc).getWidth()))/2,canvasHeight*2/8);
+            g2d.drawString("$"+totalDeposits.toString(), (canvasWidth-(int)(generalFont.getStringBounds("$"+totalDeposits.toString().toString(),frc).getWidth()))/2,canvasHeight*2/8);
             g2d.drawString("Total Withdrawls: ", (canvasWidth-(int)(generalFont.getStringBounds("Total Withdrawls: ".toString(),frc).getWidth()))/2,canvasHeight*4/8);
-            g2d.drawString(totalWithdrawls.toString(), (canvasWidth-(int)(generalFont.getStringBounds(totalWithdrawls.toString(),frc).getWidth()))/2,canvasHeight*6/8);
-            
+            g2d.drawString("$"+totalWithdrawls.toString(), (canvasWidth-(int)(generalFont.getStringBounds("$"+totalWithdrawls.toString(),frc).getWidth()))/2,canvasHeight*6/8);
+        }else{
+            g2d.setFont(headerFont);
+            g2d.drawString(headers[0], (canvasWidth-(int)(headerFont.getStringBounds(headers[0].toString(),frc).getWidth()))/2, headerFontPlacement);
         }
     }
 }
