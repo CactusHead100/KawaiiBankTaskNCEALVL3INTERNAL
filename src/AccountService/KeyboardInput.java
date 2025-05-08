@@ -31,7 +31,7 @@ public class KeyboardInput implements KeyListener{
     public void keyPressed(KeyEvent e) {
         System.out.println("keyPressed");
         if((bankTellingService.currentScreen != Screen.OptionMenu)&&(bankTellingService.currentScreen != Screen.EndDay)){
-            if(correctInput(e.getKeyCode(),false)){
+            if(correctInput(e.getKeyCode())){
                 nextChar = bankTellingService.CharacterEntered(e.getKeyChar(),e.getKeyCode());
             }else{
                 bankTellingService.repaint();
@@ -49,17 +49,10 @@ public class KeyboardInput implements KeyListener{
         
     }
     
-    private boolean correctInput(int charKeyCode, boolean numOnly){
-        if(numOnly){
-            if((charKeyCode == keyCodeExceptionEnter)||((charKeyCode >= keyCode0)&&(charKeyCode <= keycode9))||((charKeyCode == keyCodeExceptionBackspace)&&(bankTellingService.typedChars.length != 0))){
-                return true;
-            }
-            return false;
-        }else{
+    private boolean correctInput(int charKeyCode){
             if((charKeyCode == keyCodeExceptionSpace)||(charKeyCode == keyCodeExceptionPeriod)||(charKeyCode == keyCodeExceptionEnter)||((charKeyCode >= keyCodeA)&&(charKeyCode <= keyCodeZ))||((charKeyCode >= keyCode0)&&(charKeyCode <= keycode9))||((charKeyCode == keyCodeExceptionBackspace)&&(bankTellingService.typedChars.length != 0))){
                 return true;
             }
             return false;
-        }
     }
 }

@@ -35,6 +35,7 @@ public class BankTellingService extends JPanel{
      */
     public enum Screen{OptionMenu, BalanceChecker, BalanceChanger, AccountCreater, AccountDeleter, EndDay};
     public Screen currentScreen = Screen.OptionMenu;
+    private String[] headers = {"Menu","Balance","Transactions","Create Account","Delete Account"};
     /*
      * placement for the text and textbox on the canvas and other related things
      */
@@ -118,11 +119,13 @@ public class BankTellingService extends JPanel{
         }
         input = "";
         typedChars = new char[0];
+        textToDraw = "";
     }
     /*
      * takes a string (a line read prior from the csv file) and splits it down into the variables we want then creates an object containg them all
      */
     public void CreateNewAccount(String customerInfo){
+        System.out.println("creating...");
         Accounts.ACCOUNTS accountType = null;
         String[] individualInfo = customerInfo.split(",");
         switch (individualInfo[3]) {
@@ -138,12 +141,7 @@ public class BankTellingService extends JPanel{
         }
         Double balance = Double.parseDouble(individualInfo[4]);
         users.put(individualInfo[0],new Accounts(individualInfo[0],individualInfo[1],individualInfo[2],accountType,balance));
-    }
-    /*
-     * delets the account (who would've thought???)
-     */
-    public void DeleteAccount(String accountName){
-        users.remove(accountName);
+        System.out.println(individualInfo[0]);
     }
     /*
      * gets called when a click occurs and then changes the menu depending on the location
@@ -163,44 +161,66 @@ public class BankTellingService extends JPanel{
                     currentScreen = Screen.BalanceChanger;
 
                     foundUser = false;
-                    buttons = new Buttons[3];
-                    buttons[0] = new Buttons(buttonX, buttonGap*9+buttonHeight*4+headerSize, buttonWidth, buttonHeight, textBoxCurviness, buttonText[5]);
+                    createBackToMenuButton(3);
                     buttons[1] = new Buttons(canvasWidth/16, buttonGap*7+buttonHeight*3+headerSize, buttonWidth*3/4, buttonHeight, textBoxCurviness, buttonText[6]);
                     buttons[2] = new Buttons(canvasWidth*9/16, buttonGap*7+buttonHeight*3+headerSize, buttonWidth*3/4, buttonHeight, textBoxCurviness, buttonText[7]);
                     repaint();
-
+                }else if(buttons[2].isClicked(x,y)){
+                    currentScreen = Screen.AccountCreater;
+                    currentUserInfo = new String[4];
+                    createBackToMenuButton(1);
+                    textToDraw = "Enter Name";
+                }else if(buttons[3].isClicked(x,y)){
+                    currentScreen = Screen.AccountDeleter;
+                    createBackToMenuButton(1);
                 }
             break;
             case Screen.BalanceChecker:
-                if(buttons[0].isClicked(x,y)){
-                    currentScreen = Screen.OptionMenu;
-                    createMenuButtons();
-                    repaint();
-                }
+                backToMenu(x, y);
             break;
             case Screen.BalanceChanger:
-                if(buttons[0].isClicked(x,y)){
-                    currentScreen = Screen.OptionMenu;
-                    createMenuButtons();
-                    repaint();
+                backToMenu(x, y);
                     /*
                      * when eiher the deposit or withdraw are hit it calls a function which trnasfers the money and says if it was succseful doing so or not
                      */
-                }else if(buttons[1].isClicked(x, y)&&foundUser){
+                if(buttons[1].isClicked(x, y)&&foundUser){
                     succsessfulTransfer(false);
                 }else if(buttons[2].isClicked(x, y)&&foundUser){
                     succsessfulTransfer(true);
                 }
+            break;
+            case Screen.AccountCreater:
+                backToMenu(x, y);
+            break;
+            case Screen.AccountDeleter:
+                backToMenu(x, y);
             break;
             default:
                 break;
         }
     }
     /*
+     * creates a button that leads back to the menu 
+     */
+    private void createBackToMenuButton(int numberToCreate){
+        buttons = new Buttons[numberToCreate];
+        buttons[0] = new Buttons(buttonX, buttonGap*9+buttonHeight*4+headerSize, buttonWidth, buttonHeight, textBoxCurviness, buttonText[5]);
+        repaint();
+    }
+    /*
+     * checks if they are clicked and if so brings it back to the menu
+     */
+    private void backToMenu(int x,int y){
+        if(buttons[0].isClicked(x,y)){
+            currentScreen = Screen.OptionMenu;
+            createMenuButtons();
+            repaint();
+        }
+    }
+    /*
      * wrote this to lessen code 
      */
     private void succsessfulTransfer(boolean withdrawing){
-        System.out.println("moneying");
         try {
             Double amount = Double.parseDouble(input);
             if(users.get(currentUserInfo[0]).siphonMoney(amount, withdrawing)){
@@ -237,8 +257,41 @@ public class BankTellingService extends JPanel{
                         textToDraw = "User Not Found";
                     }
                 }
-            default:
-                break;
+            break;
+            /*
+             * each iteration of being called (after a new string has been entered) it will store this then once all has been entered will create the account
+             */
+            case Screen.AccountCreater:
+                if((currentUserInfo[0] == null)){
+                    if(!users.containsKey(input)){
+                        currentUserInfo[0] = input;
+                        textToDraw = "Enter Adress";
+                    }
+                }else if(currentUserInfo[1] == null){
+                    currentUserInfo[1] = input;
+                    textToDraw = "Enter Account Number";
+                }else if(currentUserInfo[2] == null){
+                    currentUserInfo[2] = input;
+                    textToDraw = "Enter Account Type";
+                }else if(currentUserInfo[3] == null){
+                    if((input.equals("Savings"))||input.equals("Current")||input.equals("Everyday")){
+                        currentUserInfo[3] = input;
+                        if(!users.containsKey(currentUserInfo[0])){
+                            CreateNewAccount(currentUserInfo[0]+","+currentUserInfo[1]+","+currentUserInfo[2]+","+currentUserInfo[3]+",0");
+                            textToDraw = "Success";
+                            currentUserInfo = new String[4];
+                        }
+                    }
+                }
+            break; 
+            case Screen.AccountDeleter:
+                if(users.containsKey(input)){
+                    users.remove(input);
+                    textToDraw = "Removed";
+                }else{
+                    textToDraw = "Not Found";
+                }
+            break;         
         }
     }
     /*
@@ -305,19 +358,9 @@ public class BankTellingService extends JPanel{
             g2d.drawString(buttons[i].text,((buttons[i].x+(buttons[i].width/2))-((int)buttonTextFont.getStringBounds(buttons[i].text,frc).getWidth())/2),//gets the width of the string and then uses that to center it on the canvas
             buttons[i].y+buttonTextSize+buttonTextOffeset*2);
         }
-        switch (currentScreen) {
-            case Screen.BalanceChecker:
-                /*
-                 * drawing the balance number
-                 */
-                g2d.setFont(new Font("Arial", Font.PLAIN, 80));
-                g2d.drawString(textToDraw, (canvasWidth-(int)(new Font("Arial", Font.PLAIN, 80).getStringBounds(textToDraw,frc).getWidth()))/2,canvasHeight*3/4);
-            break;
-            case Screen.BalanceChanger:
-                g2d.setFont(new Font("Arial", Font.PLAIN, 40));
-                g2d.drawString(textToDraw, (canvasWidth-(int)(new Font("Arial", Font.PLAIN, 40).getStringBounds(textToDraw,frc).getWidth()))/2,canvasHeight*5/8);
-            break;
-        }
+        /*
+         * draws the text box and text for all pages apart from menu and end screen
+         */
         if((currentScreen != Screen.OptionMenu)&&(currentScreen != Screen.EndDay)){
             g2d.setColor(textColor);
             g2d.setFont(typedTextFont);
@@ -332,7 +375,10 @@ public class BankTellingService extends JPanel{
             */
             g2d.setColor(textColor);
             g2d.drawRoundRect(textBoxX, textBoxY, textBoxWidth, textBoxHeight, textBoxCurviness, textBoxCurviness);
-
+            if(currentScreen != Screen.OptionMenu){
+                g2d.setFont(new Font("Arial", Font.PLAIN, 40));
+                g2d.drawString(textToDraw, (canvasWidth-(int)(new Font("Arial", Font.PLAIN, 40).getStringBounds(textToDraw,frc).getWidth()))/2,canvasHeight*5/8);
+            }
         }
     }
 }
