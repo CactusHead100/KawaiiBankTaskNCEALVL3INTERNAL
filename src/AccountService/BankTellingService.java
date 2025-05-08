@@ -145,7 +145,6 @@ public class BankTellingService extends JPanel{
      * takes a string (a line read prior from the csv file) and splits it down into the variables we want then creates an object containg them all
      */
     public void CreateNewAccount(String customerInfo){
-        System.out.println("creating...");
         Accounts.ACCOUNTS accountType = null;
         String[] individualInfo = customerInfo.split(",");
         switch (individualInfo[3]) {
@@ -161,7 +160,6 @@ public class BankTellingService extends JPanel{
         }
         Double balance = Double.parseDouble(individualInfo[4]);
         users.put(individualInfo[0],new Accounts(individualInfo[0],individualInfo[1],individualInfo[2],accountType,balance));
-        System.out.println(individualInfo[0]);
     }
     /*
      * gets called when a click occurs and then changes the menu depending on the location
@@ -235,7 +233,6 @@ public class BankTellingService extends JPanel{
                 fileWriter.flush();
                     fileWriter.close();
             } catch (Exception e) {
-                System.out.println(e);
             }
         }
     /*
@@ -270,7 +267,6 @@ public class BankTellingService extends JPanel{
             }
         } catch (Exception e) {
             textToDraw = "Invalid";
-            System.out.println(e);
         }
         repaint();
     }
@@ -460,6 +456,14 @@ public class BankTellingService extends JPanel{
                 g2d.drawString(textToDraw, (canvasWidth-(int)(generalFont.getStringBounds(textToDraw,frc).getWidth()))/2,generalFontPlacement);
             }
         }else if(currentScreen == Screen.EndDay){
+            /*
+             * makes sure that the are no rounding errors
+             */
+            totalDeposits = Math.round(totalDeposits*100.0)/100.0;
+            totalWithdrawls = Math.round(totalWithdrawls*100.0)/100.0;
+            /*
+             * draws the text showing what happened that day
+             */
             g2d.setFont(generalFont);
             g2d.drawString("Total Deposits: ", (canvasWidth-(int)(generalFont.getStringBounds("Total Deposits: ".toString(),frc).getWidth()))/2,canvasHeight/8);
             g2d.drawString("$"+totalDeposits.toString(), (canvasWidth-(int)(generalFont.getStringBounds("$"+totalDeposits.toString().toString(),frc).getWidth()))/2,canvasHeight*2/8);

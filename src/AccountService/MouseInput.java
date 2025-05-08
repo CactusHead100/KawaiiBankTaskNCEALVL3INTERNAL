@@ -23,6 +23,9 @@ public class MouseInput implements MouseListener, MouseMotionListener{
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        /*
+         * calls a function if a click occurs and passes the position
+         */
             bankTellingService.clickOccurred(e.getX(),e.getY());
             
     }

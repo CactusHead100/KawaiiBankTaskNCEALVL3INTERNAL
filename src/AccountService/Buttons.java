@@ -25,6 +25,9 @@ public class Buttons {
          */
         this.shape = new RoundRectangle2D.Double(x,y,width,height,curviness,curviness);
     }
+    /*
+     * checks if x and y are within the button and if so says it was clicked
+     */
     public boolean isClicked(int x, int y){
         if((x>=this.x)&&(x<=this.x+this.width)&&(y>=this.y)&&(y<=this.y+this.height)){
             return true;
